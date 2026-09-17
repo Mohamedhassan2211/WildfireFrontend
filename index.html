@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Wildfire Response Map</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.29/"></script>
+  <style>
+    html, body, #viewDiv { height: 100%; margin: 0; padding: 0; }
+    #controls {
+      position: absolute; top: 10px; right: 10px; z-index: 10;
+      background: white; padding: 10px; border-radius: 6px;
+    }
+    button { display: block; margin-bottom: 6px; padding: 6px 10px; width: 100%; }
+    #addPointBtn.active { background-color: orangered; color: white; }
+  </style>
+</head>
+<body>
+  <div id="viewDiv"></div>
+  <div id="controls">
+    <button id="deleteBtn">Delete Selected</button>
+    <button id="saveBtn">Save Selected</button>
+    <button id="addPointBtn">Add New Fire</button>
+  </div>
+
+  <script>
+    require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer",
+             "esri/layers/GraphicsLayer", "esri/Graphic"],
+    function (Map, MapView, FeatureLayer, GraphicsLayer, Graphic) {
+
+      // ---------- خريطة أسماء أنواع الحرائق (من الـ Schema الأصلي في السيرفر) ----------
+      const fireTypes = {
+        1: "Aerial Hazard", 4: "Camp", 0: "Division Break", 6: "Drop Point",
+        7: "Fire Origin", 8: "Fire Station", 9: "First Aid Station", 10: "Helibase",
+        12: "Hot Spot", 16: "Lookout", 17: "Telephone", 18: "Mobile Weather Unit",
+        20: "Safety Zone", 22: "Spot Fire", 25: "Water Source", 26: "Wind Speed Direction"
+      };
+
+      // ---------- Popup للحرائق الأصلية (FeatureLayer) - يستخدم "fields" ----------
+      const firePopupTemplate = {
+        title: "Fire Event: {description}",
+        content: [{
+          type: "fields",
+          fieldInfos: [
+            { fieldName: "objectid", label: "objectid" },
+            { fieldName: "description", label: "Description" },
+            { fieldName: "eventtype", label: "Event Type" },
+            { fieldName: "eventdate", label: "Date" }
+          ]
+        }]
+      };
+
+      // ---------- Popup للنقط الجديدة (GraphicsLayer) - يستخدم "text" ----------
+      const newFirePopupTemplate = {
+        title: "New Fire Event: {description}",
+        content: "OBJECTID: {objectid}<br>Description: {description}<br>Event Type: {eventtype}<br>Date: {eventdate}"
+      };
+
+      // ---------- طبقة الحرائق الأصلية من السيرفر ----------
+      const fireLayer = new FeatureLayer({
+        url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0",
+        outFields: ["objectid", "description", "eventtype", "eventdate"],
+        popupTemplate: firePopupTemplate
+      });
+
+      // ---------- طبقة الحرائق الجديدة اللي بيضيفها المستخدم يدويًا ----------
+      const newPointsLayer = new GraphicsLayer({
+        popupTemplate: newFirePopupTemplate
+      });
+
+      const map = new Map({
+        basemap: "topo-vector",
+        layers: [fireLayer, newPointsLayer]
+      });
+
+      const view = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [-118, 34],
+        zoom: 5
+      });
+
+      let selectedGraphics = [];
+      let layerViewGlobal = null;
+      let addPointMode = false;
+
+      view.whenLayerView(fireLayer).then(function (layerView) {
+        layerViewGlobal = layerView;
+      });
+
+      // ---------- تحميل النقط المُضافة يدويًا والمحفوظة سابقًا من الـ API ----------
+      // بنعرض بس اللي فيها isNew:true عشان منكررش رسم حرائق السيرفر الأصلية اللي اتحفظت بزرار Save Selected
+      async function loadSavedFires() {
+        try {
+          const response = await fetch("https://localhost:7286/api/fires");
+          if (!response.ok) return;
+
+          const savedFires = await response.json();
+
+          savedFires
+            .filter(fire => fire.attributes && fire.attributes.isNew === true)
+            .forEach(fire => {
+              const graphic = new Graphic({
+                geometry: {
+                  type: "point",
+                  longitude: fire.geometry.x,
+                  latitude: fire.geometry.y
+                },
+                symbol: {
+                  type: "simple-marker",
+                  style: "diamond",
+                  color: "orangered",
+                  size: 14,
+                  outline: { color: "black", width: 1.5 }
+                },
+                attributes: fire.attributes
+              });
+              newPointsLayer.add(graphic);
+            });
+        } catch (err) {
+          console.error("تعذر تحميل البيانات المحفوظة:", err);
+        }
+      }
+
+      loadSavedFires(); // نفّذها فور فتح الصفحة
+
+      // ---------- زرار تفعيل وضع "إضافة حريقة جديدة" ----------
+      const addPointBtn = document.getElementById("addPointBtn");
+      addPointBtn.addEventListener("click", function () {
+        addPointMode = !addPointMode;
+        addPointBtn.classList.toggle("active", addPointMode);
+        addPointBtn.textContent = addPointMode ? "Click on map..." : "Add New Fire";
+      });
+
+      // ---------- حدث الضغط على الخريطة ----------
+      view.on("click", function (event) {
+
+        // لو المستخدم في وضع "إضافة حريقة جديدة"
+        if (addPointMode) {
+          const point = event.mapPoint;
+
+          const description = prompt("وصف الحريقة الجديدة:", "New Fire Event");
+          if (description === null) {
+            addPointMode = false;
+            addPointBtn.classList.remove("active");
+            addPointBtn.textContent = "Add New Fire";
+            return;
+          }
+
+          let eventTypeInput = prompt(
+            "اختار نوع الحريقة بالرقم:\n" +
+            "7 = Fire Origin\n12 = Hot Spot\n22 = Spot Fire\n25 = Water Source",
+            "12"
+          );
+          const eventtype = parseInt(eventTypeInput) || 12;
+
+          const newGraphic = new Graphic({
+            geometry: point,
+            symbol: {
+              type: "simple-marker",
+              style: "diamond",
+              color: "orangered",
+              size: 14,
+              outline: { color: "black", width: 1.5 }
+            },
+            attributes: {
+              objectid: Date.now(),
+              description: description || "New Fire Event",
+              eventtype: eventtype,
+              eventdate: new Date().toISOString(),
+              rotation: 0,
+              isNew: true   // ✅ علامة تميّزها كحريقة مُضافة يدويًا عن حرائق السيرفر
+            }
+          });
+
+          newPointsLayer.add(newGraphic);
+
+          view.popup.open({
+            features: [newGraphic],
+            location: point
+          });
+
+          saveGraphicsToApi([newGraphic]);
+
+          addPointMode = false;
+          addPointBtn.classList.remove("active");
+          addPointBtn.textContent = "Add New Fire";
+          return;
+        }
+
+        // ---------- اختيار حريقة موجودة (من السيرفر أو من النقط المُضافة يدويًا) ----------
+        view.hitTest(event).then(function (response) {
+          const results = response.results.filter(
+            r => r.graphic.layer === fireLayer || r.graphic.layer === newPointsLayer
+          );
+          if (results.length > 0) {
+            const graphic = results[0].graphic;
+            const alreadySelected = selectedGraphics.find(g => g.attributes.objectid === graphic.attributes.objectid);
+            if (!alreadySelected) {
+              selectedGraphics.push(graphic);
+            }
+            view.popup.open({
+              features: [graphic],
+              location: event.mapPoint
+            });
+          }
+        });
+      });
+
+      // ---------- زرار Delete Selected ----------
+      document.getElementById("deleteBtn").addEventListener("click", function () {
+        if (selectedGraphics.length === 0) return;
+
+        const idsToRemove = selectedGraphics.map(g => g.attributes.objectid);
+
+        if (layerViewGlobal) {
+          layerViewGlobal.filter = {
+            where: `objectid NOT IN (${idsToRemove.join(",")})`
+          };
+        }
+
+        selectedGraphics.forEach(g => {
+          if (g.layer === newPointsLayer) {
+            newPointsLayer.remove(g);
+          }
+        });
+
+        selectedGraphics = [];
+      });
+
+      // ---------- زرار Save Selected ----------
+      document.getElementById("saveBtn").addEventListener("click", function () {
+        if (selectedGraphics.length === 0) {
+          alert("لم يتم اختيار أي حريق.");
+          return;
+        }
+        saveGraphicsToApi(selectedGraphics);
+        selectedGraphics = [];
+      });
+
+      // ---------- فانكشن عامة للحفظ ----------
+      async function saveGraphicsToApi(graphicsArray) {
+        const payload = graphicsArray.map(g => ({
+          id: g.attributes.objectid,
+          attributes: g.attributes,
+          geometry: {
+            x: g.geometry.longitude,
+            y: g.geometry.latitude
+          }
+        }));
+
+        try {
+          const response = await fetch("https://localhost:7286/api/fires", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          if (response.ok) {
+            alert("تم حفظ البيانات بنجاح.");
+          } else {
+            alert("حدث خطأ أثناء الحفظ.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("تعذر الاتصال بالـ API.");
+        }
+      }
+
+    });
+  </script>
+</body>
+</html>
