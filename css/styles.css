@@ -1,0 +1,247 @@
+:root {
+    --color-bg: #f4f5f7;
+    --color-surface: #ffffff;
+    --color-border: #e1e4e8;
+    --color-text: #1f2933;
+    --color-muted: #6b7280;
+    --color-primary: #0f62fe;
+    --color-primary-dark: #0043ce;
+    --color-danger: #da1e28;
+    --color-danger-dark: #a2151d;
+    --color-accent: #ff7a1a;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/* A class such as .new-fire-form { display: flex } outranks the browser rule
+   for [hidden], so the attribute has to win explicitly. */
+[hidden] { display: none !important; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.app-header {
+    padding: 14px 24px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+}
+.app-header h1 { margin: 0; font-size: 1.25rem; }
+.app-header__subtitle {
+    margin: 2px 0 0;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+}
+
+.app-main { flex: 1; display: flex; min-height: 0; }
+
+.map-panel { position: relative; flex: 1; min-width: 0; }
+#viewDiv { width: 100%; height: 100%; }
+
+.map-hint {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    z-index: 5;
+}
+
+.side-panel {
+    width: 320px;
+    flex-shrink: 0;
+    background: var(--color-bg);
+    border-left: 1px solid var(--color-border);
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+.card h2 { margin: 0 0 6px; font-size: 1rem; }
+.card__hint {
+    margin: 0 0 12px;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    line-height: 1.4;
+}
+
+.selection-list {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    max-height: 160px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+}
+.selection-list li {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+.selection-list li:last-child { border-bottom: none; }
+.selection-list__empty {
+    color: var(--color-muted);
+    justify-content: center !important;
+}
+.selection-list__label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.selection-list__remove {
+    background: none;
+    border: none;
+    color: var(--color-danger);
+    cursor: pointer;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.count {
+    font-weight: normal;
+    color: var(--color-muted);
+    font-size: 0.85rem;
+}
+
+.badge {
+    flex-shrink: 0;
+    align-self: center;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+.badge--esri  { background: #e3effd; color: var(--color-primary-dark); }
+.badge--local { background: #ffe8d6; color: #9a4a00; }
+
+.legend-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    background: orangered;
+    border: 1px solid #000;
+    transform: rotate(45deg);
+    vertical-align: middle;
+}
+
+.button-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.btn {
+    flex: 1;
+    padding: 8px 10px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn--primary { background: var(--color-primary); color: #fff; }
+.btn--primary:hover:not(:disabled) { background: var(--color-primary-dark); }
+
+.btn--danger { background: var(--color-danger); color: #fff; }
+.btn--danger:hover:not(:disabled) { background: var(--color-danger-dark); }
+
+.btn--secondary { width: 100%; background: var(--color-accent); color: #fff; }
+.btn--secondary.active { background: var(--color-danger-dark); }
+
+.btn--ghost {
+    background: transparent;
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+}
+.btn--ghost:hover { background: var(--color-bg); }
+
+.new-fire-form {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.field label {
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+    color: var(--color-muted);
+}
+.field select,
+.field input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.coords { margin: 0; font-size: 0.75rem; color: var(--color-muted); }
+
+.status { margin: 0; font-size: 0.85rem; line-height: 1.45; }
+.status--error   { color: var(--color-danger); }
+.status--success { color: #198038; }
+
+.api-hint { margin: 8px 0 0; }
+.api-hint code {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 1px 4px;
+    font-size: 0.75rem;
+}
+
+/* Fields table used by the popup of locally added points */
+.popup-fields { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.popup-fields th,
+.popup-fields td {
+    text-align: left;
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+}
+.popup-fields th { color: var(--color-muted); font-weight: 600; width: 40%; }
+.popup-fields tr:last-child th,
+.popup-fields tr:last-child td { border-bottom: none; }
+
+/* Narrow screens: stack the panel under the map */
+@media (max-width: 860px) {
+    .app { height: auto; min-height: 100vh; }
+    .app-main { flex-direction: column; }
+    .map-panel { height: 60vh; flex: none; }
+    .side-panel {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--color-border);
+        overflow-y: visible;
+    }
+}
