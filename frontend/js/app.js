@@ -179,7 +179,7 @@ require([
     setStatus("Saving…");
     try {
       await save(fires);
-      setStatus(fires.length + " fire(s) saved — تم حفظ البيانات بنجاح.", "ok");
+      setStatus(fires.length + " fire(s) saved — تم حفظ البيانات بنجاح", "ok");
       selected.length = 0;
       render();
     } catch (err) {
@@ -220,7 +220,7 @@ require([
 
     try {
       await save([toFire(graphic)]);
-      setStatus("New point saved — تم حفظ البيانات بنجاح.", "ok");
+      setStatus("New point saved — تم حفظ البيانات بنجاح", "ok");
     } catch (err) {
       setStatus("Point added to the map but not saved: " + err.message, "error");
     }
