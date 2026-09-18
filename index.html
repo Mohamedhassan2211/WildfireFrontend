@@ -3,95 +3,55 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Wildfire Interactive Map</title>
+    <title>Wildfire Map</title>
 
     <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
     <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-    <div class="app">
-        <header class="app-header">
-            <h1>Wildfire Interactive Map</h1>
-            <p class="app-header__subtitle">
-                ArcGIS Maps SDK for JavaScript + ASP.NET Core Web API
-            </p>
-        </header>
+    <header>
+        <h1>Wildfire Map</h1>
+    </header>
 
-        <main class="app-main">
-            <section class="map-panel" aria-label="Wildfire map">
-                <div id="viewDiv"></div>
-                <p id="mapHint" class="map-hint" hidden></p>
-                <noscript>
-                    <p class="map-hint" style="top: 50%;">
-                        This application needs JavaScript to display the map.
-                    </p>
-                </noscript>
+    <main>
+        <div class="map">
+            <div id="viewDiv"></div>
+            <p id="hint" hidden>Click on the map to place the point.</p>
+        </div>
+
+        <aside class="panel">
+            <section>
+                <h2>Selected (<span id="count">0</span>)</h2>
+                <ul id="selection"></ul>
+
+                <div class="row">
+                    <button id="saveBtn" type="button">Save Selected</button>
+                    <button id="deleteBtn" type="button" class="danger">Delete Selected</button>
+                </div>
+                <button id="restoreBtn" type="button" class="link">Restore hidden fires</button>
+
+                <p class="note">
+                    Delete only hides the features from the map. The ArcGIS FeatureServer
+                    is never modified.
+                </p>
             </section>
 
-            <aside class="side-panel" aria-label="Tools">
-                <section class="card">
-                    <h2>Selection <span id="selectionCount" class="count"></span></h2>
-                    <p class="card__hint">
-                        Click a fire on the map to open its popup and toggle its selection.
-                        Selected fires are highlighted on the map.
-                    </p>
+            <section>
+                <h2>New point</h2>
+                <button id="addBtn" type="button">Add Fire Point</button>
 
-                    <ul id="selectionList" class="selection-list" aria-live="polite">
-                        <li class="selection-list__empty">No fires selected yet.</li>
-                    </ul>
-
-                    <div class="button-row">
-                        <button id="saveSelectedBtn" type="button" class="btn btn--primary">Save Selected</button>
-                        <button id="deleteSelectedBtn" type="button" class="btn btn--danger">Delete Selected</button>
+                <form id="addForm" hidden>
+                    <input id="addDesc" type="text" maxlength="75" placeholder="Description" />
+                    <div class="row">
+                        <button type="submit">Add</button>
+                        <button id="cancelBtn" type="button" class="link">Cancel</button>
                     </div>
-                    <div class="button-row">
-                        <button id="clearSelectionBtn" type="button" class="btn btn--ghost">Clear Selection</button>
-                        <button id="restoreHiddenBtn" type="button" class="btn btn--ghost">Restore Hidden</button>
-                    </div>
-                    <p class="card__hint">
-                        <strong>Delete Selected</strong> only hides features from the map view.
-                        The ArcGIS FeatureServer is never modified.
-                    </p>
-                </section>
+                </form>
+            </section>
 
-                <section class="card">
-                    <h2>Add a new fire point</h2>
-                    <p class="card__hint">
-                        The new point is saved to your own backend (saved_fires.json) — it is not
-                        written back to the ArcGIS FeatureServer. It is drawn as an
-                        <span class="legend-dot"></span> orange diamond.
-                    </p>
-
-                    <button id="addFireBtn" type="button" class="btn btn--secondary">Add Fire Point</button>
-
-                    <form id="newFireForm" class="new-fire-form" hidden>
-                        <div class="field">
-                            <label for="newFireType">Type</label>
-                            <select id="newFireType" name="newFireType" required></select>
-                        </div>
-                        <div class="field">
-                            <label for="newFireDescription">Description</label>
-                            <input id="newFireDescription" name="newFireDescription" type="text"
-                                   maxlength="75" placeholder="e.g. New fire spotted near ridge" />
-                        </div>
-                        <p id="newFireCoords" class="coords"></p>
-                        <div class="button-row">
-                            <button type="submit" class="btn btn--primary">Add Fire</button>
-                            <button id="cancelAddFireBtn" type="button" class="btn btn--ghost">Cancel</button>
-                        </div>
-                    </form>
-                </section>
-
-                <section class="card">
-                    <h2>Status</h2>
-                    <p id="status" class="status" role="status" aria-live="polite">Loading map&hellip;</p>
-                    <p class="card__hint api-hint">
-                        API endpoint is configured in <code>js/config.js</code>.
-                    </p>
-                </section>
-            </aside>
-        </main>
-    </div>
+            <p id="status" class="status">Loading…</p>
+        </aside>
+    </main>
 
     <script src="https://js.arcgis.com/4.29/"></script>
     <script src="js/config.js"></script>
