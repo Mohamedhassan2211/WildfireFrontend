@@ -1,6 +1,25 @@
-@WildfireApi_HostAddress = http://localhost:5005
+﻿@WildfireApi_HostAddress = https://localhost:7286
 
-GET {{WildfireApi_HostAddress}}/weatherforecast/
+GET {{WildfireApi_HostAddress}}/api/fires
 Accept: application/json
+
+###
+
+POST {{WildfireApi_HostAddress}}/api/fires
+Content-Type: application/json
+
+[
+  {
+    "id": 1,
+    "attributes": {
+      "objectid": 1,
+      "description": "Test fire"
+    },
+    "geometry": {
+      "x": -117.1,
+      "y": 34.2
+    }
+  }
+]
 
 ###

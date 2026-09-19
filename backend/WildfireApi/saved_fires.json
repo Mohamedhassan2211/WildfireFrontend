@@ -1,38 +1,40 @@
 [
   {
-    "id": 1789765624312,
+    "id": 5286227,
     "attributes": {
-      "objectid": 1789765624312,
-      "description": "point",
-      "eventdate": 1789765624312
+      "description": null,
+      "eventdate": null,
+      "eventtype": null,
+      "objectid": 5286227,
+      "rotation": null
     },
     "geometry": {
-      "x": -104.149901449684,
-      "y": 33.13954298752608
+      "x": -103.84277343749973,
+      "y": 36.9498917868264
     }
   },
   {
-    "id": 1789765675246,
+    "id": 1789812914608,
     "attributes": {
-      "objectid": 1789765675246,
-      "description": "new",
-      "eventdate": 1789765675246
+      "objectid": 1789812914608,
+      "description": "new point",
+      "eventdate": 1789812914608
     },
     "geometry": {
-      "x": -103.21240234375394,
-      "y": 35.16377903316637
+      "x": -107.2846661806135,
+      "y": 32.36341254188939
     }
   },
   {
-    "id": 1789765687955,
+    "id": 1789812914608,
     "attributes": {
-      "objectid": 1789765687955,
-      "description": "new",
-      "eventdate": 1789765687955
+      "objectid": 1789812914608,
+      "description": "new point",
+      "eventdate": 1789812914608
     },
     "geometry": {
-      "x": -104.35498046875358,
-      "y": 33.59219981982719
+      "x": -107.2846661806135,
+      "y": 32.36341254188939
     }
   }
 ]

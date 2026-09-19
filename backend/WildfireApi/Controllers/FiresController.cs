@@ -51,34 +51,6 @@ namespace WildfireApi.Controllers
         public IActionResult GetFires() => Ok(ReadAll());
 
         // -----------------------------------------------------------
-        // DELETE /api/fires/{id} — remove a single fire by id
-        // -----------------------------------------------------------
-        [HttpDelete("{id:long}")]
-        public IActionResult DeleteFire(long id)
-        {
-            bool removed;
-
-            lock (_fileLock)
-            {
-                var existing = ReadAll();
-                var match = existing.FirstOrDefault(f => f.Id == id);
-
-                if (match is null) return NotFound(new { message = "Fire not found." });
-
-                existing.Remove(match);
-                removed = true;
-
-                System.IO.File.WriteAllText(
-                    FilePath,
-                    JsonSerializer.Serialize(existing, JsonOpts));
-            }
-
-            return removed
-                ? Ok(new { message = "Fire deleted successfully.", id })
-                : NotFound(new { message = "Fire not found." });
-        }
-
-        // -----------------------------------------------------------
         // Helper: read all fires from the JSON file
         // -----------------------------------------------------------
         private static List<FireModel> ReadAll()

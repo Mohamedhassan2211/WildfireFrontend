@@ -55,7 +55,6 @@ Base URL: `https://localhost:7286/api/fires`
 | --- | --- | --- |
 | POST | `/api/fires` | Appends the received fires to `saved_fires.json` |
 | GET | `/api/fires` | Returns everything stored in the file |
-| DELETE | `/api/fires/{id}` | Removes one fire from the file |
 
 Body of `POST /api/fires`:
 
